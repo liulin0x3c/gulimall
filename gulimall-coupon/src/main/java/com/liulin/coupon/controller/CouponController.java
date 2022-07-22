@@ -34,6 +34,13 @@ public class CouponController {
     /**
      * 列表
      */
+
+    @RequestMapping("/member/list")
+    public void testFeign() {
+        System.out.println("调用了testFeign函数哦");
+    }
+
+
     @RequestMapping("/list")
     //@RequiresPermissions("coupon:coupon:list")
     public R list(@RequestParam Map<String, Object> params){
