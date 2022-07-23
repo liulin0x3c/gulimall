@@ -6,6 +6,8 @@ import java.util.Map;
 //import org.apache.shiro.authz.annotation.RequiresPermissions;
 import com.liulin.member.feign.CouponFeignService;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Value;
+import org.springframework.cloud.context.config.annotation.RefreshScope;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
@@ -26,6 +28,7 @@ import com.liulin.common.utils.R;
  * @email liulin0x3c@gmail.com
  * @date 2022-07-21 01:34:09
  */
+@RefreshScope
 @RestController
 @RequestMapping("member/member")
 public class MemberController {
@@ -35,11 +38,20 @@ public class MemberController {
     @Autowired
     private CouponFeignService couponFeignService;
 
-    @RequestMapping("/test")
+    @Value("${gulimall-member.user.name}")
+    private String name;
+
+    @RequestMapping("/test/feign")
     public R testFeign() {
         System.out.println("运行了testFeign函数，下面调用conpon的函数");
         couponFeignService.testFeign();
-        return R.ok().put("114514","ok");
+        return R.ok().put("114514", "ok");
+    }
+
+    @RequestMapping("/test/config")
+    public R testConfig() {
+        System.out.println("运行了testConfig函数" + "dynamicName:"+name);
+        return R.ok().put("dynamicName", name);
     }
     /**
      * 列表
