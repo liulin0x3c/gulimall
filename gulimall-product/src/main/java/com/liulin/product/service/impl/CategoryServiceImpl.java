@@ -1,7 +1,11 @@
 package com.liulin.product.service.impl;
 
+import com.baomidou.mybatisplus.core.mapper.BaseMapper;
 import org.springframework.stereotype.Service;
-import java.util.Map;
+
+import java.util.*;
+import java.util.stream.Collectors;
+
 import com.baomidou.mybatisplus.core.conditions.query.QueryWrapper;
 import com.baomidou.mybatisplus.core.metadata.IPage;
 import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
@@ -26,4 +30,29 @@ public class CategoryServiceImpl extends ServiceImpl<CategoryDao, CategoryEntity
         return new PageUtils(page);
     }
 
+    @Override
+    public List<CategoryEntity> listWithTree() {
+        List<CategoryEntity> entities = baseMapper.selectList(null);
+        return entities.stream().filter(
+                categoryEntity -> Objects.equals(categoryEntity.getParentCid(), 0L)
+        ).peek(menu-> menu.setChildren(getChildren(menu, entities))).sorted(
+                Comparator.comparingInt(c -> (c.getSort() != null ? c.getSort() : 0))
+        ).collect(Collectors.toList());
+    }
+
+    @Override
+    public void removeMenusByIds(List<Long> asList) {
+        //TODO 检查当前要删除的2菜单，是否被别的地方引用
+
+        //逻辑删除
+        baseMapper.deleteBatchIds(asList);
+    }
+
+    private List<CategoryEntity> getChildren(CategoryEntity root, List<CategoryEntity> all) {
+        return all.stream().filter(
+                categoryEntity -> Objects.equals(root.getCatId(), categoryEntity.getParentCid())
+        ).peek(categoryEntity -> categoryEntity.setChildren(getChildren(categoryEntity, all))).sorted(
+                Comparator.comparingInt(c -> (c.getSort() != null ? c.getSort() : 0))
+        ).collect(Collectors.toList());
+    }
 }

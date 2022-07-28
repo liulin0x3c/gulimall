@@ -1,5 +1,8 @@
 package com.liulin.member;
 
+//import org.junit.Test;
+//import org.springframework.boot.test.context.SpringBootTest;
+
 import org.junit.Test;
 import org.springframework.boot.test.context.SpringBootTest;
 
@@ -7,7 +10,8 @@ import org.springframework.boot.test.context.SpringBootTest;
 class GulimallMemberApplicationTests {
 
     @Test
-    void contextLoads() {
+    public void contextLoads() {
+
     }
 
 }

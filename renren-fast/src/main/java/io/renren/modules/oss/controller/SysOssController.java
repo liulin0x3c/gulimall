@@ -79,7 +79,17 @@ public class SysOssController {
 	public R saveConfig(@RequestBody CloudStorageConfig config){
 		//校验类型
 		ValidatorUtils.validateEntity(config);
-		ValidatorUtils.validateEntity(config, Constant.CloudService.getByValue(config.getType()));
+
+		if(config.getType() == Constant.CloudService.QINIU.getValue()){
+			//校验七牛数据
+			ValidatorUtils.validateEntity(config, QiniuGroup.class);
+		}else if(config.getType() == Constant.CloudService.ALIYUN.getValue()){
+			//校验阿里云数据
+			ValidatorUtils.validateEntity(config, AliyunGroup.class);
+		}else if(config.getType() == Constant.CloudService.QCLOUD.getValue()){
+			//校验腾讯云数据
+			ValidatorUtils.validateEntity(config, QcloudGroup.class);
+		}
 
         sysConfigService.updateValueByKey(KEY, new Gson().toJson(config));
 
