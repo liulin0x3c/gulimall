@@ -11,3 +11,4 @@
 **/.gitignore
 **/target
 .idea
+.gitignore

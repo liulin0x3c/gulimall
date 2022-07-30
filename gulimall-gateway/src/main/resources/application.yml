@@ -10,21 +10,28 @@ spring:
         predicates:
         - Query=url,qq
 
-      - id: admin_route
+      - id: product_route
         uri: lb://gulimall-product
         predicates:
           - Path=/api/product/**
         filters:
-            - RewritePath=/api/(?<segment>.*),/$\{segment}
+          - RewritePath=/api/(?<segment>.*),/$\{segment}
 
-      - id: admin_route
+      - id: third_party_route
+        uri: lb://gulimall-third-party
+        predicates:
+          - Path=/api/thirdparty/**
+        filters:
+          - RewritePath=/api/(?<segment>.*),/$\{segment}
+
+      - id: renren_fast_route
         uri: lb://renren-fast
         predicates:
         - Path=/api/**
         filters:
         - RewritePath=/api/(?<segment>.*),/renren-fast/$\{segment}
 
-
+#  http://localhost:88/api/product/brand/list?t=1659176538151&page=1&limit=10&key=
 #  application:
 #    name: gulimall-gateway
 server:

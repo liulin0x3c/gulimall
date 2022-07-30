@@ -23,6 +23,8 @@
         <module>gulimall-ware</module>
         <module>gulimall-order</module>
         <module>gulimall-coupon</module>
+        <module>gulimall-gateway</module>
+        <module>gulimall-third-party</module>
 
         <module>renren-generator</module>
         <module>renren-fast</module>
