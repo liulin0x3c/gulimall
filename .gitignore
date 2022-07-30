@@ -12,3 +12,11 @@
 **/target
 .idea
 .gitignore
+/gulimall.iml
+/gulimall-common/gulimall-common.iml
+/gulimall-coupon/gulimall-coupon.iml
+/gulimall-member/gulimall-member.iml
+/gulimall-order/gulimall-order.iml
+/gulimall-product/gulimall-product.iml
+/gulimall-ware/gulimall-ware.iml
+/renren-generator/renren-generator.iml
