@@ -4,13 +4,14 @@ import com.baomidou.mybatisplus.annotation.TableId;
 import com.baomidou.mybatisplus.annotation.TableName;
 
 import java.io.Serializable;
+
+import com.liulin.valid.ListValues;
+import com.liulin.valid.SaveGroup;
+import com.liulin.valid.UpdateGroup;
 import lombok.Data;
 import org.hibernate.validator.constraints.URL;
 
-import javax.validation.constraints.NotEmpty;
-import javax.validation.constraints.Pattern;
-import javax.validation.constraints.Positive;
-import javax.validation.constraints.PositiveOrZero;
+import javax.validation.constraints.*;
 
 /**
  * 品牌
@@ -27,18 +28,20 @@ public class BrandEntity implements Serializable {
 	/**
 	 * 品牌id
 	 */
+//	@NotNull(groups = {UpdateGroup.class}, message = "修改时,必须指定品牌id")
+//	@Null(groups = {SaveGroup.class}, message = "新增时,品牌id不能指定")
 	@TableId
 	private Long brandId;
 	/**
 	 * 品牌名
 	 */
-	@NotEmpty(message = "品牌名称必须填写")
+//	@NotBlank(groups = {SaveGroup.class}, message = "新增时候品牌名称必须填写")
 	private String name;
 	/**
 	 * 品牌logo地址
 	 */
-	@NotEmpty(message = "logo不能为空")
-	@URL(message = "logo地址必须为有效的url")
+//	@NotEmpty(message = "logo不能为空")
+//	@URL(message = "logo地址必须为有效的url")
 	private String logo;
 	/**
 	 * 介绍
@@ -47,11 +50,12 @@ public class BrandEntity implements Serializable {
 	/**
 	 * 显示状态[0-不显示；1-显示]
 	 */
+	@ListValues(values = {0,1})
 	private Integer showStatus;
 	/**
 	 * 检索首字母
 	 */
-	@Pattern(regexp = "^[a-zA-Z]$",message = "检索首字母只包含一个字母")
+//	@Pattern(regexp = "^[a-zA-Z]$",message = "检索首字母只包含一个字母")
 	private String firstLetter;
 	/**
 	 * 排序
