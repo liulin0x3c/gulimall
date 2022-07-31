@@ -1,6 +1,7 @@
 package com.liulin.product.exception;
 
 
+import com.liulin.common.exception.BizCodeEnume;
 import com.liulin.common.utils.R;
 import lombok.extern.slf4j.Slf4j;
 import lombok.val;
@@ -24,6 +25,6 @@ public class GulimallExceptionControllerAdvice {
             String field = item.getField();
             map.put(field, message);
         });
-        return R.error(400, "提交的数据不合法").put("data", map);
+        return R.error(BizCodeEnume.INVALID_EXCEPTION).put("data", map);
     }
 }
