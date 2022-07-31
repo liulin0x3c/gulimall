@@ -4,8 +4,13 @@ import com.baomidou.mybatisplus.annotation.TableId;
 import com.baomidou.mybatisplus.annotation.TableName;
 
 import java.io.Serializable;
-import java.util.Date;
 import lombok.Data;
+import org.hibernate.validator.constraints.URL;
+
+import javax.validation.constraints.NotEmpty;
+import javax.validation.constraints.Pattern;
+import javax.validation.constraints.Positive;
+import javax.validation.constraints.PositiveOrZero;
 
 /**
  * 品牌
@@ -27,10 +32,13 @@ public class BrandEntity implements Serializable {
 	/**
 	 * 品牌名
 	 */
+	@NotEmpty(message = "品牌名称必须填写")
 	private String name;
 	/**
 	 * 品牌logo地址
 	 */
+	@NotEmpty(message = "logo不能为空")
+	@URL(message = "logo地址必须为有效的url")
 	private String logo;
 	/**
 	 * 介绍
@@ -43,10 +51,12 @@ public class BrandEntity implements Serializable {
 	/**
 	 * 检索首字母
 	 */
+	@Pattern(regexp = "^[a-zA-Z]$",message = "检索首字母只包含一个字母")
 	private String firstLetter;
 	/**
 	 * 排序
 	 */
+	@PositiveOrZero(message = "排序权重必须是正数")
 	private Integer sort;
 
 }

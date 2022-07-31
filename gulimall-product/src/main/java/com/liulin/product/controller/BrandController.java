@@ -1,10 +1,13 @@
 package com.liulin.product.controller;
 
 import java.util.Arrays;
+import java.util.HashMap;
 import java.util.Map;
 
 //import org.apache.shiro.authz.annotation.RequiresPermissions;
+import org.apache.ibatis.logging.Log;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.validation.BindingResult;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
@@ -16,6 +19,7 @@ import com.liulin.product.service.BrandService;
 import com.liulin.common.utils.PageUtils;
 import com.liulin.common.utils.R;
 
+import javax.validation.Valid;
 
 
 /**
@@ -59,9 +63,18 @@ public class BrandController {
      */
     @RequestMapping("/save")
     //@RequiresPermissions("product:brand:save")
-    public R save(@RequestBody BrandEntity brand){
-		brandService.save(brand);
-
+    public R save(@Valid @RequestBody BrandEntity brand, BindingResult bindingResult) {
+        System.out.println(brand);
+        Map<String, String> map = new HashMap<>();
+        if(bindingResult.hasErrors()) {
+            bindingResult.getFieldErrors().forEach((item)->{
+                String message = item.getDefaultMessage();
+                String field = item.getField();
+                map.put(field, message);
+            });
+            return R.error(400, "提交的数据不合法").put("data", map);
+        }
+        brandService.save(brand);
         return R.ok();
     }
 
