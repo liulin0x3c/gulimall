@@ -1,8 +1,8 @@
 package com.liulin.product.service.impl;
 
+import com.baomidou.mybatisplus.core.conditions.update.LambdaUpdateWrapper;
 import com.liulin.product.dao.BrandDao;
 import com.liulin.product.dao.CategoryDao;
-import com.liulin.product.entity.CategoryEntity;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import java.util.Map;
@@ -30,7 +30,7 @@ public class CategoryBrandRelationServiceImpl extends ServiceImpl<CategoryBrandR
     public PageUtils queryPage(Map<String, Object> params) {
         IPage<CategoryBrandRelationEntity> page = this.page(
                 new Query<CategoryBrandRelationEntity>().getPage(params),
-                new QueryWrapper<CategoryBrandRelationEntity>()
+                new QueryWrapper<>()
         );
 
         return new PageUtils(page);
@@ -43,6 +43,21 @@ public class CategoryBrandRelationServiceImpl extends ServiceImpl<CategoryBrandR
         categoryBrandRelation.setBrandName(brandname);
         categoryBrandRelation.setCatelogName(categoryName);
         this.save(categoryBrandRelation);
+    }
+
+    @Override
+    public void updateBrand(Long brandId, String brandName) {
+        LambdaUpdateWrapper<CategoryBrandRelationEntity> updateWrapper =
+                new LambdaUpdateWrapper<>();
+        updateWrapper.eq(CategoryBrandRelationEntity::getBrandId, brandId);
+        CategoryBrandRelationEntity categoryBrandRelationEntity = new CategoryBrandRelationEntity();
+        categoryBrandRelationEntity.setBrandName(brandName);
+        this.update(categoryBrandRelationEntity,updateWrapper);
+    }
+
+    @Override
+    public void updateCategory(Long catId, String name) {
+        this.baseMapper.updateCategory(catId, name);
     }
 
 }

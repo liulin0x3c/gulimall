@@ -1,6 +1,8 @@
 package com.liulin.product.service.impl;
 
 import com.baomidou.mybatisplus.core.mapper.BaseMapper;
+import com.liulin.product.service.CategoryBrandRelationService;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 import java.util.*;
@@ -62,6 +64,15 @@ public class CategoryServiceImpl extends ServiceImpl<CategoryDao, CategoryEntity
         path.add(catelogId);
         Collections.reverse(path);
         return path.toArray(new Long[0]);
+    }
+
+
+    @Autowired
+    CategoryBrandRelationService categoryBrandRelationService;
+    @Override
+    public void safeUpdateById(CategoryEntity category) {
+        this.updateById(category);
+        categoryBrandRelationService.updateCategory(category.getCatId(),category.getName());
     }
 
     private List<CategoryEntity> getChildren(CategoryEntity root, List<CategoryEntity> all) {

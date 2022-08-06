@@ -2,6 +2,8 @@ package com.liulin.product.service.impl;
 
 import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper;
 import com.baomidou.mybatisplus.core.toolkit.StringUtils;
+import com.liulin.product.service.CategoryBrandRelationService;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import java.util.Map;
 import com.baomidou.mybatisplus.core.metadata.IPage;
@@ -31,6 +33,19 @@ public class BrandServiceImpl extends ServiceImpl<BrandDao, BrandEntity> impleme
         );
 
         return new PageUtils(page);
+    }
+
+    @Autowired
+    CategoryBrandRelationService categoryBrandRelationService;
+
+    @Override
+    public void safeUpdateById(BrandEntity brand) {
+        this.updateById(brand);
+        String brandName = brand.getName();
+        if(StringUtils.isNotEmpty(brandName)) {
+            //TODO 同步更新其他关联表中的数据
+            categoryBrandRelationService.updateBrand(brand.getBrandId(), brandName);
+        }
     }
 
 }
