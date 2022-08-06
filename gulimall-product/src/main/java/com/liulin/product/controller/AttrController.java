@@ -87,10 +87,10 @@ public class AttrController {
     }
 
 //    http://localhost:88/api/product/attr/base/list/0?t=1659803282778&page=1&limit=10&key=
-    @RequestMapping("/base/list")
+    @RequestMapping("/base/list/{catelogId}")
     //@RequiresPermissions("product:attr:list")
-    public R baseList(@RequestParam Map<String, Object> params){
-        PageUtils page = attrService.queryPage(params);
+    public R baseList(@RequestParam Map<String, Object> params, @PathVariable Long catelogId){
+        PageUtils page = attrService.queryBaseAttrPage(params, catelogId);
         return R.ok().put("page", page);
 }
 }
