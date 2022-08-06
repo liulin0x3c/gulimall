@@ -58,8 +58,7 @@ public class CategoryBrandRelationController {
     @RequestMapping("/save")
     //@RequiresPermissions("product:categorybrandrelation:save")
     public R save(@RequestBody CategoryBrandRelationEntity categoryBrandRelation){
-		categoryBrandRelationService.save(categoryBrandRelation);
-
+        categoryBrandRelationService.savefilledBrandNameAndCategoryName(categoryBrandRelation);
         return R.ok();
     }
 
@@ -86,7 +85,7 @@ public class CategoryBrandRelationController {
 
 // http://localhost:88/api/product/categorybrandrelation/catelog/list?t=1659775888726&brandId=12
     @GetMapping("/catelog/list")
-    public R catelogList(@RequestParam("brandId") Long brandId){
+    public R catelogList(@RequestParam("brandId") Long brandId) {
         LambdaQueryWrapper<CategoryBrandRelationEntity> queryWrapper = new LambdaQueryWrapper<>();
         queryWrapper.eq(CategoryBrandRelationEntity::getBrandId, brandId);
         List<CategoryBrandRelationEntity> list = categoryBrandRelationService.list(queryWrapper);
