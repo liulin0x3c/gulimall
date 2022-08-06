@@ -48,6 +48,22 @@ public class CategoryServiceImpl extends ServiceImpl<CategoryDao, CategoryEntity
         baseMapper.deleteBatchIds(asList);
     }
 
+    @Override
+    public Long[] findCatelogPath(Long catelogId) {
+        List<Long> path = new ArrayList<>();
+        CategoryEntity categoryEntity = getById(catelogId);
+        Long parentCid = categoryEntity.getParentCid();
+        while (!Objects.equals(parentCid, 0L)) {
+            path.add(catelogId);
+            catelogId = parentCid;
+            categoryEntity = getById(catelogId);
+            parentCid = categoryEntity.getParentCid();
+        }
+        path.add(catelogId);
+        Collections.reverse(path);
+        return path.toArray(new Long[0]);
+    }
+
     private List<CategoryEntity> getChildren(CategoryEntity root, List<CategoryEntity> all) {
         return all.stream().filter(
                 categoryEntity -> Objects.equals(root.getCatId(), categoryEntity.getParentCid())

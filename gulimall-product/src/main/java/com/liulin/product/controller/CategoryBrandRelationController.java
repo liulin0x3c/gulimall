@@ -87,4 +87,6 @@ public class CategoryBrandRelationController {
         return R.ok();
     }
 
+// http://localhost:88/api/product/categorybrandrelation/catelog/list?t=1659775888726&brandId=12
+
 }
