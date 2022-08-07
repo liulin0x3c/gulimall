@@ -6,6 +6,7 @@ import com.liulin.product.entity.AttrEntity;
 import com.liulin.product.vo.AttrRespVo;
 import com.liulin.product.vo.AttrVo;
 
+import java.util.List;
 import java.util.Map;
 
 /**
@@ -21,11 +22,17 @@ public interface AttrService extends IService<AttrEntity> {
 
     void safeSave(AttrVo attr);
 
-    PageUtils queryBaseAttrPage(Map<String, Object> params, Long catelogId);
+//    PageUtils queryBaseAttrPage(Map<String, Object> params, Long catelogId);
 
     AttrRespVo getAttrRespVoById(Long attrId);
 
     void safeUpdateById(AttrVo attrVo);
+
+//    PageUtils querySaleAttrPage(Map<String, Object> params, Long catelogId);
+
+    void safeRemoveByIds(List<Long> ids);
+
+    PageUtils queryAttrPage(Map<String, Object> params, Long catelogId, String type);
 
 
 //    String getGroupName(AttrEntity attrEntity);

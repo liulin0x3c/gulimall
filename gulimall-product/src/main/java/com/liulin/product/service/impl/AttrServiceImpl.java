@@ -6,6 +6,7 @@ import com.baomidou.mybatisplus.core.conditions.update.LambdaUpdateWrapper;
 import com.baomidou.mybatisplus.core.metadata.IPage;
 import com.baomidou.mybatisplus.core.toolkit.StringUtils;
 import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
+import com.liulin.common.constant.ProductConstant;
 import com.liulin.common.utils.PageUtils;
 import com.liulin.common.utils.Query;
 import com.liulin.product.dao.AttrAttrgroupRelationDao;
@@ -22,12 +23,12 @@ import com.liulin.product.vo.AttrRespVo;
 import com.liulin.product.vo.AttrVo;
 import org.springframework.beans.BeanUtils;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.context.annotation.Bean;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.util.List;
 import java.util.Map;
+import java.util.Objects;
 import java.util.stream.Collectors;
 
 
@@ -53,12 +54,14 @@ public class AttrServiceImpl extends ServiceImpl<AttrDao, AttrEntity> implements
         AttrEntity attrEntity = new AttrEntity();
         BeanUtils.copyProperties(attr, attrEntity);
         this.save(attrEntity);
-        Long attrId = attrEntity.getAttrId();
-        Long attrGroupId = attr.getAttrGroupId();
-        AttrAttrgroupRelationEntity attrAttrgroupRelationEntity = new AttrAttrgroupRelationEntity();
-        attrAttrgroupRelationEntity.setAttrGroupId(attrGroupId);
-        attrAttrgroupRelationEntity.setAttrId(attrId);
-        attrAttrgroupRelationDao.insert(attrAttrgroupRelationEntity);
+        if(Objects.equals(attrEntity.getAttrType(), ProductConstant.AttrType.BASE.getCode())) {
+            Long attrId = attrEntity.getAttrId();
+            Long attrGroupId = attr.getAttrGroupId();
+            AttrAttrgroupRelationEntity attrAttrgroupRelationEntity = new AttrAttrgroupRelationEntity();
+            attrAttrgroupRelationEntity.setAttrGroupId(attrGroupId);
+            attrAttrgroupRelationEntity.setAttrId(attrId);
+            attrAttrgroupRelationDao.insert(attrAttrgroupRelationEntity);
+        }
     }
 
     @Autowired
@@ -66,9 +69,14 @@ public class AttrServiceImpl extends ServiceImpl<AttrDao, AttrEntity> implements
     @Autowired
     CategoryDao categoryDao;
 
+
     @Override
-    public PageUtils queryBaseAttrPage(Map<String, Object> params, Long catelogId) {
-        LambdaQueryWrapper<AttrEntity> queryWrapper = new LambdaQueryWrapper<>();
+    public PageUtils queryAttrPage(Map<String, Object> params, Long catelogId, String type) {
+        LambdaQueryWrapper<AttrEntity> queryWrapper =
+                new LambdaQueryWrapper<>();
+        if("sale".equalsIgnoreCase(type)) {
+            queryWrapper.eq(AttrEntity::getAttrType, ProductConstant.AttrType.SALE.getCode());
+        }
         if(catelogId != 0L) {
             queryWrapper.eq(AttrEntity::getCatelogId, catelogId);
         }
@@ -88,8 +96,10 @@ public class AttrServiceImpl extends ServiceImpl<AttrDao, AttrEntity> implements
             AttrRespVo attrRespVo = new AttrRespVo();
             BeanUtils.copyProperties(attrEntity, attrRespVo);
 
-            String groupName = getGroupName(attrEntity);
-            attrRespVo.setGroupName(groupName);
+            if("sale".equalsIgnoreCase(type)) {
+                String groupName = getGroupName(attrEntity);
+                attrRespVo.setGroupName(groupName);
+            }
 
             String catelogName = getCatelogName(attrEntity);
             attrRespVo.setCatelogName(catelogName);
@@ -100,6 +110,77 @@ public class AttrServiceImpl extends ServiceImpl<AttrDao, AttrEntity> implements
         pageUtils.setList(respVos);
         return pageUtils;
     }
+//    @Override
+//    public PageUtils queryBaseAttrPage(Map<String, Object> params, Long catelogId) {
+//        LambdaQueryWrapper<AttrEntity> queryWrapper = new LambdaQueryWrapper<>();
+//        if(catelogId != 0L) {
+//            queryWrapper.eq(AttrEntity::getCatelogId, catelogId);
+//        }
+//        String key = (String) params.get("key");
+//
+//        if(StringUtils.isNotEmpty(key)) {
+//            queryWrapper.and((wrapper) ->
+//                    wrapper.eq(AttrEntity::getAttrId,key).or().like(AttrEntity::getAttrName, key));
+//        }
+//
+//        IPage<AttrEntity> page = this.page(
+//                new Query<AttrEntity>().getPage(params),
+//                queryWrapper
+//        );
+//        List<AttrEntity> attrs = page.getRecords();
+//        List<AttrRespVo> respVos = attrs.stream().map((attrEntity) -> {
+//            AttrRespVo attrRespVo = new AttrRespVo();
+//            BeanUtils.copyProperties(attrEntity, attrRespVo);
+//
+//            String groupName = getGroupName(attrEntity);
+//            attrRespVo.setGroupName(groupName);
+//
+//            String catelogName = getCatelogName(attrEntity);
+//            attrRespVo.setCatelogName(catelogName);
+//
+//            return attrRespVo;
+//        }).collect(Collectors.toList());
+//        PageUtils pageUtils = new PageUtils(page);
+//        pageUtils.setList(respVos);
+//        return pageUtils;
+//    }
+//    @Override
+//    public PageUtils querySaleAttrPage(Map<String, Object> params, Long catelogId) {
+//        LambdaQueryWrapper<AttrEntity> queryWrapper =
+//                new LambdaQueryWrapper<AttrEntity>()
+//                        .eq(AttrEntity::getAttrType, ProductConstant.AttrType.SALE.getCode());
+//        if(catelogId != 0L) {
+//            queryWrapper.eq(AttrEntity::getCatelogId, catelogId);
+//        }
+//        String key = (String) params.get("key");
+//
+//        if(StringUtils.isNotEmpty(key)) {
+//            queryWrapper.and((wrapper) ->
+//                    wrapper.eq(AttrEntity::getAttrId,key).or().like(AttrEntity::getAttrName, key));
+//        }
+//
+//        IPage<AttrEntity> page = this.page(
+//                new Query<AttrEntity>().getPage(params),
+//                queryWrapper
+//        );
+//        List<AttrEntity> attrs = page.getRecords();
+//        List<AttrRespVo> respVos = attrs.stream().map((attrEntity) -> {
+//            AttrRespVo attrRespVo = new AttrRespVo();
+//            BeanUtils.copyProperties(attrEntity, attrRespVo);
+//
+//            String groupName = getGroupName(attrEntity);
+//            attrRespVo.setGroupName(groupName);
+//
+//            String catelogName = getCatelogName(attrEntity);
+//            attrRespVo.setCatelogName(catelogName);
+//
+//            return attrRespVo;
+//        }).collect(Collectors.toList());
+//        PageUtils pageUtils = new PageUtils(page);
+//        pageUtils.setList(respVos);
+//        return pageUtils;
+//    }
+
 
     @Override
     public AttrRespVo getAttrRespVoById(Long attrId) {
@@ -127,27 +208,41 @@ public class AttrServiceImpl extends ServiceImpl<AttrDao, AttrEntity> implements
         AttrEntity attrEntity = new AttrEntity();
         BeanUtils.copyProperties(attrVo, attrEntity);
         this.updateById(attrEntity);
-        LambdaQueryWrapper<AttrAttrgroupRelationEntity> queryWrapper = new LambdaQueryWrapper<>();
-        Long attrId = attrVo.getAttrId();
-        queryWrapper.eq(AttrAttrgroupRelationEntity::getAttrId, attrId);
-        Long count = attrAttrgroupRelationDao.selectCount(queryWrapper);
+        if (Objects.equals(attrVo.getAttrType(), ProductConstant.AttrType.BASE.getCode())) {
+            LambdaQueryWrapper<AttrAttrgroupRelationEntity> queryWrapper = new LambdaQueryWrapper<>();
+            Long attrId = attrVo.getAttrId();
+            queryWrapper.eq(AttrAttrgroupRelationEntity::getAttrId, attrId);
+            Long count = attrAttrgroupRelationDao.selectCount(queryWrapper);
 
-        AttrAttrgroupRelationEntity attrAttrgroupRelationEntity = new AttrAttrgroupRelationEntity();
-        attrAttrgroupRelationEntity.setAttrId(attrId);
+            AttrAttrgroupRelationEntity attrAttrgroupRelationEntity = new AttrAttrgroupRelationEntity();
+            attrAttrgroupRelationEntity.setAttrId(attrId);
 
-        Long attrGroupId = attrVo.getAttrGroupId();
-        attrAttrgroupRelationEntity.setAttrGroupId(attrGroupId);
+            Long attrGroupId = attrVo.getAttrGroupId();
+            attrAttrgroupRelationEntity.setAttrGroupId(attrGroupId);
 
-        if(count != 0) {
+            if(count != 0) {
+                LambdaUpdateWrapper<AttrAttrgroupRelationEntity> updateWrapper = new LambdaUpdateWrapper<>();
+                updateWrapper.eq(AttrAttrgroupRelationEntity::getAttrId, attrId);
+                attrAttrgroupRelationDao.update(attrAttrgroupRelationEntity, updateWrapper);
+            }else {
+                attrAttrgroupRelationDao.insert(attrAttrgroupRelationEntity);
+            }
+        }
+
+    }
+
+    @Override
+    public void safeRemoveByIds(List<Long> ids) {
+        this.removeByIds(ids);
+        for (Long attrId : ids) {
             LambdaUpdateWrapper<AttrAttrgroupRelationEntity> updateWrapper = new LambdaUpdateWrapper<>();
             updateWrapper.eq(AttrAttrgroupRelationEntity::getAttrId, attrId);
-            attrAttrgroupRelationDao.update(attrAttrgroupRelationEntity, updateWrapper);
-        }else {
-            attrAttrgroupRelationDao.insert(attrAttrgroupRelationEntity);
+            attrAttrgroupRelationDao.delete(updateWrapper);
         }
     }
 
-    //    @Override
+
+
     private String getGroupName(AttrEntity attrEntity) {
         Long attrGroupId = getGroupId(attrEntity);
         return getGroupName(attrGroupId);

@@ -82,16 +82,24 @@ public class AttrController {
     @RequestMapping("/delete")
     //@RequiresPermissions("product:attr:delete")
     public R delete(@RequestBody Long[] attrIds){
-		attrService.removeByIds(Arrays.asList(attrIds));
-
+		attrService.safeRemoveByIds(Arrays.asList(attrIds));
         return R.ok();
     }
 
 //    http://localhost:88/api/product/attr/base/list/0?t=1659803282778&page=1&limit=10&key=
-    @RequestMapping("/base/list/{catelogId}")
+//    @RequestMapping("/base/list/{catelogId}")
+//    //@RequiresPermissions("product:attr:list")
+//    public R baseList(@RequestParam Map<String, Object> params, @PathVariable Long catelogId){
+//        PageUtils page = attrService.queryBaseAttrPage(params, catelogId);
+//        return R.ok().put("page", page);
+//    }
+
+
+    @RequestMapping("/{type}/list/{catelogId}")
     //@RequiresPermissions("product:attr:list")
-    public R baseList(@RequestParam Map<String, Object> params, @PathVariable Long catelogId){
-        PageUtils page = attrService.queryBaseAttrPage(params, catelogId);
+    public R typeList(@RequestParam Map<String, Object> params, @PathVariable Long catelogId,
+                      @PathVariable String type) {
+        PageUtils page = attrService.queryAttrPage(params, catelogId, type);
         return R.ok().put("page", page);
-}
+    }
 }
