@@ -19,6 +19,7 @@ import com.liulin.product.entity.AttrGroupEntity;
 import com.liulin.product.entity.CategoryEntity;
 import com.liulin.product.service.AttrService;
 import com.liulin.product.service.CategoryService;
+import com.liulin.product.vo.AttrAttrgroupRelationVo;
 import com.liulin.product.vo.AttrRespVo;
 import com.liulin.product.vo.AttrVo;
 import org.springframework.beans.BeanUtils;
@@ -26,6 +27,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.util.Arrays;
 import java.util.List;
 import java.util.Map;
 import java.util.Objects;
@@ -109,6 +111,70 @@ public class AttrServiceImpl extends ServiceImpl<AttrDao, AttrEntity> implements
         PageUtils pageUtils = new PageUtils(page);
         pageUtils.setList(respVos);
         return pageUtils;
+    }
+
+    @Override
+    public List<AttrEntity> getRelationAttr(Long attrgroupId) {
+        LambdaQueryWrapper<AttrAttrgroupRelationEntity> queryWrapper = new LambdaQueryWrapper<AttrAttrgroupRelationEntity>().eq(AttrAttrgroupRelationEntity::getAttrGroupId, attrgroupId);
+        List<AttrAttrgroupRelationEntity> attrAttrgroupRelationEntities = attrAttrgroupRelationDao.selectList(queryWrapper);
+        List<Long> attrIds = attrAttrgroupRelationEntities.stream().map(AttrAttrgroupRelationEntity::getAttrId).collect(Collectors.toList());
+        List<AttrEntity> entities = null;
+        if (!attrIds.isEmpty()) {
+            entities = this.listByIds(attrIds);
+        }
+        return entities;
+    }
+
+    /**
+     * 获取当前分组没有关联的所有属性
+     */
+    @Override
+    public PageUtils getNoRelationAttr(Map<String, Object> params, Long attrgroupId) {
+        AttrGroupEntity attrGroupEntity = attrGroupDao.selectById(attrgroupId);
+        Long catelogId = attrGroupEntity.getCatelogId();
+        LambdaQueryWrapper<AttrGroupEntity> queryWrapper =
+                new LambdaQueryWrapper<AttrGroupEntity>()
+                        .eq(AttrGroupEntity::getCatelogId, catelogId);
+//                        .ne(AttrGroupEntity::getAttrGroupId, attrgroupId);
+        //当前分组所在分类下的所有分组attrGroupEntities
+        List<AttrGroupEntity> attrGroupEntities = attrGroupDao.selectList(queryWrapper);
+//        当前分组所在分类下的其他分组id
+        List<Long> attrGroupIds = attrGroupEntities.stream().map(AttrGroupEntity::getAttrGroupId).collect(Collectors.toList());
+//        这些分组关联的属性(需要被排除掉)
+        LambdaQueryWrapper<AttrAttrgroupRelationEntity> wrapper = new LambdaQueryWrapper<AttrAttrgroupRelationEntity>()
+                .in(AttrAttrgroupRelationEntity::getAttrGroupId, attrGroupIds);
+        List<AttrAttrgroupRelationEntity> attrAttrgroupRelationEntities = attrAttrgroupRelationDao.selectList(wrapper);
+        List<Long> groupedAttrIds = attrAttrgroupRelationEntities.stream().map(AttrAttrgroupRelationEntity::getAttrId).collect(Collectors.toList());
+//        排除他们，从attr表中找到需要的attrEntity
+        LambdaQueryWrapper<AttrEntity> queryWrapper1 = new LambdaQueryWrapper<AttrEntity>().eq(AttrEntity::getCatelogId, catelogId)
+                .eq(AttrEntity::getAttrType, ProductConstant.AttrType.BASE.getCode());
+        if(groupedAttrIds.isEmpty()) {
+            queryWrapper1.notIn(AttrEntity::getAttrId, groupedAttrIds);
+        }
+//        List<AttrEntity> entities = this.baseMapper.selectList(queryWrapper1);
+
+        String key = (String) params.get("key");
+        if(StringUtils.isNotEmpty(key)) {
+            queryWrapper1.and((wrapper1) ->
+                    wrapper1.eq(AttrEntity::getAttrId,key).or().like(AttrEntity::getAttrName, key));
+        }
+        IPage<AttrEntity> page = this.page(
+                new Query<AttrEntity>().getPage(params),
+                queryWrapper1
+        );
+
+        return new PageUtils(page);
+    }
+
+    @Override
+    public void deleteRelation(AttrAttrgroupRelationVo[] vos) {
+        List<AttrAttrgroupRelationEntity> entityList = Arrays.stream(vos).map((vo) -> {
+            AttrAttrgroupRelationEntity attrAttrgroupRelationEntity = new AttrAttrgroupRelationEntity();
+            BeanUtils.copyProperties(vo, attrAttrgroupRelationEntity);
+            return attrAttrgroupRelationEntity;
+        }).collect(Collectors.toList());
+        attrAttrgroupRelationDao.deleteBatchRelation(entityList);
+
     }
 //    @Override
 //    public PageUtils queryBaseAttrPage(Map<String, Object> params, Long catelogId) {

@@ -1,17 +1,17 @@
 package com.liulin.product.controller;
 
 import java.util.Arrays;
+import java.util.List;
 import java.util.Map;
 
 //import org.apache.shiro.authz.annotation.RequiresPermissions;
+import com.liulin.product.entity.AttrEntity;
 import com.liulin.product.entity.CategoryEntity;
+import com.liulin.product.service.AttrService;
 import com.liulin.product.service.CategoryService;
+import com.liulin.product.vo.AttrAttrgroupRelationVo;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.web.bind.annotation.PathVariable;
-import org.springframework.web.bind.annotation.RequestBody;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RequestParam;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.bind.annotation.*;
 
 import com.liulin.product.entity.AttrGroupEntity;
 import com.liulin.product.service.AttrGroupService;
@@ -35,6 +35,32 @@ public class AttrGroupController {
 
     @Autowired
     private CategoryService categoryService;
+
+    @Autowired
+    private AttrService attrService;
+
+    @PostMapping("/attr/relation/delete")
+    public R deleteRelation(AttrAttrgroupRelationVo[] vos) {
+         attrService.deleteRelation(vos);
+
+        return R.ok();
+    }
+
+
+
+    @GetMapping("/{attrgroupId}/attr/relation")
+    public R attrRelation(@PathVariable("attrgroupId") Long attrgroupId) {
+        List<AttrEntity> entities = attrService.getRelationAttr(attrgroupId);
+        return R.ok().put("data", entities);
+    }
+    @GetMapping("/{attrgroupId}/noattr/relation")
+    public R attrNoRelation(@PathVariable("attrgroupId") Long attrgroupId,
+                            @RequestParam Map<String, Object> params
+                            ) {
+        PageUtils page = attrService.getNoRelationAttr(params, attrgroupId);
+        return R.ok().put("page", page);
+    }
+
 
     /**
      * 列表

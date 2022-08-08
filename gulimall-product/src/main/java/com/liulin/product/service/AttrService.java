@@ -3,6 +3,7 @@ package com.liulin.product.service;
 import com.baomidou.mybatisplus.extension.service.IService;
 import com.liulin.common.utils.PageUtils;
 import com.liulin.product.entity.AttrEntity;
+import com.liulin.product.vo.AttrAttrgroupRelationVo;
 import com.liulin.product.vo.AttrRespVo;
 import com.liulin.product.vo.AttrVo;
 
@@ -33,6 +34,12 @@ public interface AttrService extends IService<AttrEntity> {
     void safeRemoveByIds(List<Long> ids);
 
     PageUtils queryAttrPage(Map<String, Object> params, Long catelogId, String type);
+
+    List<AttrEntity> getRelationAttr(Long attrgroupId);
+
+    void deleteRelation(AttrAttrgroupRelationVo[] vos);
+
+    PageUtils getNoRelationAttr(Map<String, Object> params, Long attrgroupId);
 
 
 //    String getGroupName(AttrEntity attrEntity);
