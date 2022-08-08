@@ -5,11 +5,13 @@ import java.util.List;
 import java.util.Map;
 
 //import org.apache.shiro.authz.annotation.RequiresPermissions;
+import com.liulin.product.entity.AttrAttrgroupRelationEntity;
 import com.liulin.product.entity.AttrEntity;
-import com.liulin.product.entity.CategoryEntity;
+import com.liulin.product.service.AttrAttrgroupRelationService;
 import com.liulin.product.service.AttrService;
 import com.liulin.product.service.CategoryService;
 import com.liulin.product.vo.AttrAttrgroupRelationVo;
+import org.springframework.beans.BeanUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.*;
 
@@ -40,9 +42,8 @@ public class AttrGroupController {
     private AttrService attrService;
 
     @PostMapping("/attr/relation/delete")
-    public R deleteRelation(AttrAttrgroupRelationVo[] vos) {
+    public R deleteRelation(@RequestBody AttrAttrgroupRelationVo[] vos) {
          attrService.deleteRelation(vos);
-
         return R.ok();
     }
 
@@ -53,6 +54,7 @@ public class AttrGroupController {
         List<AttrEntity> entities = attrService.getRelationAttr(attrgroupId);
         return R.ok().put("data", entities);
     }
+
     @GetMapping("/{attrgroupId}/noattr/relation")
     public R attrNoRelation(@PathVariable("attrgroupId") Long attrgroupId,
                             @RequestParam Map<String, Object> params
@@ -60,6 +62,20 @@ public class AttrGroupController {
         PageUtils page = attrService.getNoRelationAttr(params, attrgroupId);
         return R.ok().put("page", page);
     }
+
+    @Autowired
+    AttrAttrgroupRelationService attrAttrgroupRelationService;
+
+    @PostMapping("/attr/relation")
+    public R saveAttrRelation(@RequestBody AttrAttrgroupRelationVo[] attrAttrgroupRelationVos) {
+        for(AttrAttrgroupRelationVo attrAttrgroupRelationVo : attrAttrgroupRelationVos) {
+            AttrAttrgroupRelationEntity attrAttrgroupRelationEntity = new AttrAttrgroupRelationEntity();
+            BeanUtils.copyProperties(attrAttrgroupRelationVo, attrAttrgroupRelationEntity);
+            attrAttrgroupRelationService.save(attrAttrgroupRelationEntity);
+        }
+        return R.ok();
+    }
+
 
 
     /**

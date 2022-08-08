@@ -82,17 +82,7 @@ public class AttrServiceImpl extends ServiceImpl<AttrDao, AttrEntity> implements
         if(catelogId != 0L) {
             queryWrapper.eq(AttrEntity::getCatelogId, catelogId);
         }
-        String key = (String) params.get("key");
-
-        if(StringUtils.isNotEmpty(key)) {
-            queryWrapper.and((wrapper) ->
-                    wrapper.eq(AttrEntity::getAttrId,key).or().like(AttrEntity::getAttrName, key));
-        }
-
-        IPage<AttrEntity> page = this.page(
-                new Query<AttrEntity>().getPage(params),
-                queryWrapper
-        );
+        IPage<AttrEntity> page = fuzzyPageQuery(params, queryWrapper);
         List<AttrEntity> attrs = page.getRecords();
         List<AttrRespVo> respVos = attrs.stream().map((attrEntity) -> {
             AttrRespVo attrRespVo = new AttrRespVo();
@@ -131,40 +121,41 @@ public class AttrServiceImpl extends ServiceImpl<AttrDao, AttrEntity> implements
     @Override
     public PageUtils getNoRelationAttr(Map<String, Object> params, Long attrgroupId) {
         AttrGroupEntity attrGroupEntity = attrGroupDao.selectById(attrgroupId);
+//        当前分组所在分类的id
         Long catelogId = attrGroupEntity.getCatelogId();
         LambdaQueryWrapper<AttrGroupEntity> queryWrapper =
                 new LambdaQueryWrapper<AttrGroupEntity>()
                         .eq(AttrGroupEntity::getCatelogId, catelogId);
-//                        .ne(AttrGroupEntity::getAttrGroupId, attrgroupId);
-        //当前分组所在分类下的所有分组attrGroupEntities
+//        当前分组所在分类下的所有分组attrGroupEntities
         List<AttrGroupEntity> attrGroupEntities = attrGroupDao.selectList(queryWrapper);
-//        当前分组所在分类下的其他分组id
+//        当前分组所在分类下的所有分组id
         List<Long> attrGroupIds = attrGroupEntities.stream().map(AttrGroupEntity::getAttrGroupId).collect(Collectors.toList());
-//        这些分组关联的属性(需要被排除掉)
         LambdaQueryWrapper<AttrAttrgroupRelationEntity> wrapper = new LambdaQueryWrapper<AttrAttrgroupRelationEntity>()
                 .in(AttrAttrgroupRelationEntity::getAttrGroupId, attrGroupIds);
+        //        这些分组关联的属性(需要被排除掉)
         List<AttrAttrgroupRelationEntity> attrAttrgroupRelationEntities = attrAttrgroupRelationDao.selectList(wrapper);
+        //        这些分组关联的属性的id(需要被排除掉)
         List<Long> groupedAttrIds = attrAttrgroupRelationEntities.stream().map(AttrAttrgroupRelationEntity::getAttrId).collect(Collectors.toList());
 //        排除他们，从attr表中找到需要的attrEntity
         LambdaQueryWrapper<AttrEntity> queryWrapper1 = new LambdaQueryWrapper<AttrEntity>().eq(AttrEntity::getCatelogId, catelogId)
                 .eq(AttrEntity::getAttrType, ProductConstant.AttrType.BASE.getCode());
-        if(groupedAttrIds.isEmpty()) {
+        if(!groupedAttrIds.isEmpty()) {
             queryWrapper1.notIn(AttrEntity::getAttrId, groupedAttrIds);
         }
-//        List<AttrEntity> entities = this.baseMapper.selectList(queryWrapper1);
-
+        return new PageUtils(fuzzyPageQuery(params, queryWrapper1));
+    }
+    private IPage<AttrEntity> fuzzyPageQuery(Map<String, Object> params, LambdaQueryWrapper<AttrEntity> queryWrapper) {
         String key = (String) params.get("key");
         if(StringUtils.isNotEmpty(key)) {
-            queryWrapper1.and((wrapper1) ->
+            queryWrapper.and((wrapper1) ->
                     wrapper1.eq(AttrEntity::getAttrId,key).or().like(AttrEntity::getAttrName, key));
         }
-        IPage<AttrEntity> page = this.page(
+        return this.page(
                 new Query<AttrEntity>().getPage(params),
-                queryWrapper1
+                queryWrapper
         );
-
-        return new PageUtils(page);
     }
+
 
     @Override
     public void deleteRelation(AttrAttrgroupRelationVo[] vos) {
@@ -176,77 +167,6 @@ public class AttrServiceImpl extends ServiceImpl<AttrDao, AttrEntity> implements
         attrAttrgroupRelationDao.deleteBatchRelation(entityList);
 
     }
-//    @Override
-//    public PageUtils queryBaseAttrPage(Map<String, Object> params, Long catelogId) {
-//        LambdaQueryWrapper<AttrEntity> queryWrapper = new LambdaQueryWrapper<>();
-//        if(catelogId != 0L) {
-//            queryWrapper.eq(AttrEntity::getCatelogId, catelogId);
-//        }
-//        String key = (String) params.get("key");
-//
-//        if(StringUtils.isNotEmpty(key)) {
-//            queryWrapper.and((wrapper) ->
-//                    wrapper.eq(AttrEntity::getAttrId,key).or().like(AttrEntity::getAttrName, key));
-//        }
-//
-//        IPage<AttrEntity> page = this.page(
-//                new Query<AttrEntity>().getPage(params),
-//                queryWrapper
-//        );
-//        List<AttrEntity> attrs = page.getRecords();
-//        List<AttrRespVo> respVos = attrs.stream().map((attrEntity) -> {
-//            AttrRespVo attrRespVo = new AttrRespVo();
-//            BeanUtils.copyProperties(attrEntity, attrRespVo);
-//
-//            String groupName = getGroupName(attrEntity);
-//            attrRespVo.setGroupName(groupName);
-//
-//            String catelogName = getCatelogName(attrEntity);
-//            attrRespVo.setCatelogName(catelogName);
-//
-//            return attrRespVo;
-//        }).collect(Collectors.toList());
-//        PageUtils pageUtils = new PageUtils(page);
-//        pageUtils.setList(respVos);
-//        return pageUtils;
-//    }
-//    @Override
-//    public PageUtils querySaleAttrPage(Map<String, Object> params, Long catelogId) {
-//        LambdaQueryWrapper<AttrEntity> queryWrapper =
-//                new LambdaQueryWrapper<AttrEntity>()
-//                        .eq(AttrEntity::getAttrType, ProductConstant.AttrType.SALE.getCode());
-//        if(catelogId != 0L) {
-//            queryWrapper.eq(AttrEntity::getCatelogId, catelogId);
-//        }
-//        String key = (String) params.get("key");
-//
-//        if(StringUtils.isNotEmpty(key)) {
-//            queryWrapper.and((wrapper) ->
-//                    wrapper.eq(AttrEntity::getAttrId,key).or().like(AttrEntity::getAttrName, key));
-//        }
-//
-//        IPage<AttrEntity> page = this.page(
-//                new Query<AttrEntity>().getPage(params),
-//                queryWrapper
-//        );
-//        List<AttrEntity> attrs = page.getRecords();
-//        List<AttrRespVo> respVos = attrs.stream().map((attrEntity) -> {
-//            AttrRespVo attrRespVo = new AttrRespVo();
-//            BeanUtils.copyProperties(attrEntity, attrRespVo);
-//
-//            String groupName = getGroupName(attrEntity);
-//            attrRespVo.setGroupName(groupName);
-//
-//            String catelogName = getCatelogName(attrEntity);
-//            attrRespVo.setCatelogName(catelogName);
-//
-//            return attrRespVo;
-//        }).collect(Collectors.toList());
-//        PageUtils pageUtils = new PageUtils(page);
-//        pageUtils.setList(respVos);
-//        return pageUtils;
-//    }
-
 
     @Override
     public AttrRespVo getAttrRespVoById(Long attrId) {
