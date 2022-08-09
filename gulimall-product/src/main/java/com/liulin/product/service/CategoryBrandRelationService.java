@@ -4,6 +4,7 @@ import com.baomidou.mybatisplus.extension.service.IService;
 import com.liulin.common.utils.PageUtils;
 import com.liulin.product.entity.CategoryBrandRelationEntity;
 
+import java.util.List;
 import java.util.Map;
 
 /**
@@ -17,10 +18,12 @@ public interface CategoryBrandRelationService extends IService<CategoryBrandRela
 
     PageUtils queryPage(Map<String, Object> params);
 
-    void savefilledBrandNameAndCategoryName(CategoryBrandRelationEntity categoryBrandRelation);
+    void saveFilledBrandNameAndCategoryName(CategoryBrandRelationEntity categoryBrandRelation);
 
     void updateBrand(Long brandId, String brandName);
 
     void updateCategory(Long catId, String name);
+
+    List<CategoryBrandRelationEntity> getBrandsByCatId(Long catId);
 }
 

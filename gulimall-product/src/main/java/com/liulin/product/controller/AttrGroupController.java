@@ -11,6 +11,7 @@ import com.liulin.product.service.AttrAttrgroupRelationService;
 import com.liulin.product.service.AttrService;
 import com.liulin.product.service.CategoryService;
 import com.liulin.product.vo.AttrAttrgroupRelationVo;
+import com.liulin.product.vo.AttrGroupWithAttrVo;
 import org.springframework.beans.BeanUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.*;
@@ -76,7 +77,12 @@ public class AttrGroupController {
         return R.ok();
     }
 
-
+//    http://localhost:88/api/product/attrgroup/225/withattr
+    @GetMapping("/{catelogId}/withattr")
+    public R listAttrGroupWithAttr(@PathVariable("catelogId") Long catelogId) {
+        List<AttrGroupWithAttrVo> attrGroupWithAttrVos = attrGroupService.getattrGroupWithAttrVosByCateLogId(catelogId);
+        return R.ok().put("data", attrGroupWithAttrVos);
+    }
 
     /**
      * 列表
