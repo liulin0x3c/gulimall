@@ -1,13 +1,16 @@
 package com.liulin.product.service.impl;
 
-import com.liulin.product.dao.SpuInfoDescDao;
+import com.liulin.common.to.SkuReductionTo;
+import com.liulin.common.to.SpuBoundsTo;
 import com.liulin.product.entity.*;
+import com.liulin.product.feign.CouponFeignService;
 import com.liulin.product.service.*;
 import com.liulin.product.vo.*;
 import org.springframework.beans.BeanUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
+import java.math.BigDecimal;
 import java.util.Date;
 import java.util.List;
 import java.util.Map;
@@ -22,6 +25,7 @@ import com.liulin.common.utils.Query;
 import com.liulin.product.dao.SpuInfoDao;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.util.CollectionUtils;
+import org.springframework.util.StringUtils;
 
 
 @Service("spuInfoService")
@@ -58,6 +62,9 @@ public class SpuInfoServiceImpl extends ServiceImpl<SpuInfoDao, SpuInfoEntity> i
     @Autowired
     SkuSaleAttrValueService skuSaleAttrValueService;
 
+    @Autowired
+    CouponFeignService couponFeignService;
+
     @Transactional
     @Override
     public void saveSpuInfo(SpuSaveVo spuSaveVo) {
@@ -91,6 +98,13 @@ public class SpuInfoServiceImpl extends ServiceImpl<SpuInfoDao, SpuInfoEntity> i
         }).collect(Collectors.toList());
         productAttrValueService.saveProductAttrValues(productAttrValueEntities);
 
+        Bounds bounds = spuSaveVo.getBounds();
+        SpuBoundsTo spuBoundsTo = new SpuBoundsTo();
+        BeanUtils.copyProperties(bounds, spuBoundsTo);
+        spuBoundsTo.setSpuId(spuInfoEntityId);
+        couponFeignService.saveSpuBounds(spuBoundsTo);
+
+
         List<Skus> skus = spuSaveVo.getSkus();
         if(!CollectionUtils.isEmpty(skus)) {
             skus.forEach(item -> {
@@ -119,18 +133,25 @@ public class SpuInfoServiceImpl extends ServiceImpl<SpuInfoDao, SpuInfoEntity> i
                     skuImagesEntity.setImgUrl(img.getImgUrl());
                     skuImagesEntity.setDefaultImg(img.getDefaultImg());
                     return skuImagesEntity;
-                }).collect(Collectors.toList());
+                }).filter(skuImagesEntity -> !StringUtils.isEmpty(skuImagesEntity.getImgUrl())).collect(Collectors.toList());
                 skuImagesService.saveBatch(imagesEntities);
+
                 List<Attr> attrs = item.getAttr();
                 List<SkuSaleAttrValueEntity> skuSaleAttrValueEntities = attrs.stream().map(attr -> {
                     SkuSaleAttrValueEntity skuSaleAttrValueEntity = new SkuSaleAttrValueEntity();
                     BeanUtils.copyProperties(attr, skuSaleAttrValueEntity);
+                    skuSaleAttrValueEntity.setSkuId(skuId);
                     return skuSaleAttrValueEntity;
                 }).collect(Collectors.toList());
                 skuSaleAttrValueService.saveBatch(skuSaleAttrValueEntities);
 
+                SkuReductionTo skuReductionTo = new SkuReductionTo();
+                BeanUtils.copyProperties(item, skuReductionTo);
+                skuReductionTo.setSkuId(skuId);
+                if(skuReductionTo.getFullCount()>0 || skuReductionTo.getFullPrice().compareTo(new BigDecimal(0)) > 0) {
+                    couponFeignService.saveSkuReduction(skuReductionTo);
 
-
+                }
 
             });
         }
