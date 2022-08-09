@@ -1,12 +1,9 @@
 package com.liulin.product.service.impl;
 
 import com.liulin.product.dao.SpuInfoDescDao;
-import com.liulin.product.entity.AttrEntity;
-import com.liulin.product.entity.ProductAttrValueEntity;
-import com.liulin.product.entity.SpuInfoDescEntity;
+import com.liulin.product.entity.*;
 import com.liulin.product.service.*;
-import com.liulin.product.vo.BaseAttrs;
-import com.liulin.product.vo.SpuSaveVo;
+import com.liulin.product.vo.*;
 import org.springframework.beans.BeanUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
@@ -23,8 +20,8 @@ import com.liulin.common.utils.PageUtils;
 import com.liulin.common.utils.Query;
 
 import com.liulin.product.dao.SpuInfoDao;
-import com.liulin.product.entity.SpuInfoEntity;
 import org.springframework.transaction.annotation.Transactional;
+import org.springframework.util.CollectionUtils;
 
 
 @Service("spuInfoService")
@@ -51,6 +48,15 @@ public class SpuInfoServiceImpl extends ServiceImpl<SpuInfoDao, SpuInfoEntity> i
 
     @Autowired
     ProductAttrValueService productAttrValueService;
+
+    @Autowired
+    SkuInfoService skuInfoService;
+
+    @Autowired
+    SkuImagesService skuImagesService;
+
+    @Autowired
+    SkuSaleAttrValueService skuSaleAttrValueService;
 
     @Transactional
     @Override
@@ -83,9 +89,51 @@ public class SpuInfoServiceImpl extends ServiceImpl<SpuInfoDao, SpuInfoEntity> i
             productAttrValueEntity.setSpuId(spuInfoEntityId);
             return productAttrValueEntity;
         }).collect(Collectors.toList());
-
         productAttrValueService.saveProductAttrValues(productAttrValueEntities);
 
+        List<Skus> skus = spuSaveVo.getSkus();
+        if(!CollectionUtils.isEmpty(skus)) {
+            skus.forEach(item -> {
+                String defaultImg = "";
+                for(Images image : item.getImages()) {
+                    if(image.getDefaultImg() == 1) {
+                        defaultImg = image.getImgUrl();
+                    }
+                }
+
+                SkuInfoEntity skuInfoEntity = new SkuInfoEntity();
+                BeanUtils.copyProperties(item, skuInfoEntity);
+                skuInfoEntity.setBrandId(spuInfoEntity.getBrandId());
+                skuInfoEntity.setCatalogId(spuInfoEntity.getCatalogId());
+                skuInfoEntity.setSaleCount(0L);
+                skuInfoEntity.setSpuId(spuInfoEntityId);
+                skuInfoEntity.setSkuDefaultImg(defaultImg);
+                skuInfoService.saveSkuInfo(skuInfoEntity);
+
+                Long skuId = skuInfoEntity.getSkuId();
+
+                List<SkuImagesEntity> imagesEntities = item.getImages().stream().map(img -> {
+                    SkuImagesEntity skuImagesEntity = new SkuImagesEntity();
+
+                    skuImagesEntity.setSkuId(skuId);
+                    skuImagesEntity.setImgUrl(img.getImgUrl());
+                    skuImagesEntity.setDefaultImg(img.getDefaultImg());
+                    return skuImagesEntity;
+                }).collect(Collectors.toList());
+                skuImagesService.saveBatch(imagesEntities);
+                List<Attr> attrs = item.getAttr();
+                List<SkuSaleAttrValueEntity> skuSaleAttrValueEntities = attrs.stream().map(attr -> {
+                    SkuSaleAttrValueEntity skuSaleAttrValueEntity = new SkuSaleAttrValueEntity();
+                    BeanUtils.copyProperties(attr, skuSaleAttrValueEntity);
+                    return skuSaleAttrValueEntity;
+                }).collect(Collectors.toList());
+                skuSaleAttrValueService.saveBatch(skuSaleAttrValueEntities);
+
+
+
+
+            });
+        }
     }
 
 

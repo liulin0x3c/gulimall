@@ -1,5 +1,6 @@
 package com.liulin.product.service.impl;
 
+import com.liulin.product.entity.SkuInfoEntity;
 import org.springframework.beans.BeanUtils;
 import org.springframework.stereotype.Service;
 
@@ -46,6 +47,8 @@ public class SpuImagesServiceImpl extends ServiceImpl<SpuImagesDao, SpuImagesEnt
         this.saveBatch(spuImagesEntities);
 
     }
+
+
 
 
 }

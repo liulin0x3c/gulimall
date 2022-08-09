@@ -2,6 +2,7 @@ package com.liulin.product.service;
 
 import com.baomidou.mybatisplus.extension.service.IService;
 import com.liulin.common.utils.PageUtils;
+import com.liulin.product.entity.SkuInfoEntity;
 import com.liulin.product.entity.SpuImagesEntity;
 
 import java.util.List;
@@ -19,5 +20,6 @@ public interface SpuImagesService extends IService<SpuImagesEntity> {
     PageUtils queryPage(Map<String, Object> params);
 
     void saveImages(Long spuInfoEntityId, List<String> imageUrls);
+
 }
 
