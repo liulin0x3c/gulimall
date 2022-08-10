@@ -11,6 +11,7 @@ import org.springframework.beans.BeanUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
+import java.math.BigDecimal;
 import java.util.List;
 import java.util.Map;
 import java.util.stream.Collectors;
@@ -53,11 +54,15 @@ public class SkuFullReductionServiceImpl extends ServiceImpl<SkuFullReductionDao
         SkuLadderEntity skuLadderEntity = new SkuLadderEntity();
         BeanUtils.copyProperties(skuReductionTo, skuLadderEntity);
         skuLadderEntity.setAddOther(skuReductionTo.getCountStatus());
-        skuLadderService.save(skuLadderEntity);
+        if(skuReductionTo.getFullCount() > 0) {
+            skuLadderService.save(skuLadderEntity);
+        }
 
         SkuFullReductionEntity skuFullReductionEntity = new SkuFullReductionEntity();
         BeanUtils.copyProperties(skuReductionTo, skuFullReductionEntity);
-        this.save(skuFullReductionEntity);
+        if(skuReductionTo.getFullPrice().compareTo(new BigDecimal(0)) > 0) {
+            this.save(skuFullReductionEntity);
+        }
 
         List<MemberPrice> memberPrice = skuReductionTo.getMemberPrice();
         if(!CollectionUtils.isEmpty(memberPrice)) {
@@ -69,7 +74,9 @@ public class SkuFullReductionServiceImpl extends ServiceImpl<SkuFullReductionDao
                 memberPriceEntity.setMemberPrice(item.getPrice());
                 memberPriceEntity.setAddOther(1);
                 return memberPriceEntity;
-            }).collect(Collectors.toList());
+            }).filter(memberPriceEntity ->
+                            memberPriceEntity.getMemberPrice().compareTo(new BigDecimal(0)) > 0
+                    ).collect(Collectors.toList());
             memberPriceService.saveBatch(memberPriceEntities);
         }
     }
