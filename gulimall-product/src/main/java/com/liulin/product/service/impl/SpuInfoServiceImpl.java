@@ -150,7 +150,6 @@ public class SpuInfoServiceImpl extends ServiceImpl<SpuInfoDao, SpuInfoEntity> i
                 skuReductionTo.setSkuId(skuId);
                 if(skuReductionTo.getFullCount()>0 || skuReductionTo.getFullPrice().compareTo(new BigDecimal(0)) > 0) {
                     couponFeignService.saveSkuReduction(skuReductionTo);
-
                 }
 
             });
