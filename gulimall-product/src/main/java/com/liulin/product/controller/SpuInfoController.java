@@ -38,11 +38,11 @@ public class SpuInfoController {
     @RequestMapping("/list")
     //@RequiresPermissions("product:spuinfo:list")
     public R list(@RequestParam Map<String, Object> params){
-        PageUtils page = spuInfoService.queryPage(params);
+        PageUtils page = spuInfoService.queryPageByCondition(params);
 
         return R.ok().put("page", page);
     }
-
+//    list?t=1660111645103&status=2&key=&brandId=10&catelogId=225&page=1&limit=10
 
     /**
      * 信息

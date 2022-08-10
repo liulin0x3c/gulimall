@@ -1,5 +1,6 @@
 package com.liulin.product.service.impl;
 
+import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper;
 import com.liulin.common.to.SkuReductionTo;
 import com.liulin.common.to.SpuBoundsTo;
 import com.liulin.product.entity.*;
@@ -161,6 +162,34 @@ public class SpuInfoServiceImpl extends ServiceImpl<SpuInfoDao, SpuInfoEntity> i
     @Override
     public void saveBaseSpuInfo(SpuInfoEntity spuInfoEntity) {
         this.baseMapper.insert(spuInfoEntity);
+    }
+
+    @Override
+    public PageUtils queryPageByCondition(Map<String, Object> params) {
+//        status: 2
+//        key:
+//        brandId: 10
+//        catelogId: 225
+        LambdaQueryWrapper<SpuInfoEntity> queryWrapper = new LambdaQueryWrapper<>();
+        String status = (String) params.get("status");
+        String key = (String) params.get("key");
+        String brandId = (String) params.get("brandId");
+        String catelogId = (String) params.get("catelogId");
+        queryWrapper.and(!StringUtils.isEmpty(key), w->{
+            w.eq(SpuInfoEntity::getId, key).or().like(SpuInfoEntity::getSpuName, key);
+        });
+        queryWrapper.eq(!StringUtils.isEmpty(status), SpuInfoEntity::getPublishStatus, status);
+        queryWrapper.eq(!StringUtils.isEmpty(brandId), SpuInfoEntity::getBrandId, brandId);
+        queryWrapper.eq(!StringUtils.isEmpty(catelogId), SpuInfoEntity::getCatalogId, catelogId);
+
+
+
+        IPage<SpuInfoEntity> page = this.page(
+                new Query<SpuInfoEntity>().getPage(params),
+                queryWrapper
+        );
+
+        return new PageUtils(page);
     }
 
 
