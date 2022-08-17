@@ -20,7 +20,7 @@ public class PurchaseDetailServiceImpl extends ServiceImpl<PurchaseDetailDao, Pu
     @Override
     public PageUtils queryPage(Map<String, Object> params) {
 
-        QueryWrapper<PurchaseDetailEntity> queryWrapper = new QueryWrapper<PurchaseDetailEntity>();
+        QueryWrapper<PurchaseDetailEntity> queryWrapper = new QueryWrapper<>();
 
         String key = (String) params.get("key");
         if (!StringUtils.isEmpty(key)) {
