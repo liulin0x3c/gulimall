@@ -1,5 +1,4 @@
-package com.liulin.product.config;
-
+package com.liulin.ware.config;
 
 import com.baomidou.mybatisplus.annotation.DbType;
 import com.baomidou.mybatisplus.extension.plugins.MybatisPlusInterceptor;
@@ -11,7 +10,7 @@ import org.springframework.transaction.annotation.EnableTransactionManagement;
 
 @Configuration
 @EnableTransactionManagement
-@MapperScan("com.liulin.product.dao")
+@MapperScan("com.liulin.ware.dao")
 public class MybatisConfig {
 
     /**
