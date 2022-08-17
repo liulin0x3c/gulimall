@@ -1,17 +1,16 @@
 package com.liulin.product.controller;
 
 import java.util.Arrays;
+import java.util.List;
 import java.util.Map;
 
 //import org.apache.shiro.authz.annotation.RequiresPermissions;
+import com.liulin.product.entity.ProductAttrValueEntity;
+import com.liulin.product.service.ProductAttrValueService;
 import com.liulin.product.vo.AttrRespVo;
 import com.liulin.product.vo.AttrVo;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.web.bind.annotation.PathVariable;
-import org.springframework.web.bind.annotation.RequestBody;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RequestParam;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.bind.annotation.*;
 
 import com.liulin.product.entity.AttrEntity;
 import com.liulin.product.service.AttrService;
@@ -44,6 +43,16 @@ public class AttrController {
     }
 
 
+    @Autowired
+    private ProductAttrValueService productAttrValueService;
+    @GetMapping("/base/listforspu/{spuId}")
+    //http://localhost:88/api/product/attr/base/listforspu/11
+    public R baseAttrListForSpu(@PathVariable("spuId") Long spuId) {
+        List<ProductAttrValueEntity> entityList = productAttrValueService.baseAttrListForSpu(spuId);
+        return R.ok().put("data",entityList);
+    }
+
+
     /**
      * 信息
      */
@@ -71,8 +80,15 @@ public class AttrController {
     @RequestMapping("/update")
     //@RequiresPermissions("product:attr:update")
     public R update(@RequestBody AttrVo attrVo){
-		attrService.safeUpdateById(attrVo);
+        attrService.safeUpdateById(attrVo);
 
+        return R.ok();
+    }
+    @PostMapping("/update/{spuId}")
+    //@RequiresPermissions("product:attr:update")
+    public R updateSpuId(@PathVariable("spuId") Long spuId, @RequestBody List<ProductAttrValueEntity> productAttrValueEntityList){
+        productAttrValueService.updateSpuAttr(spuId, productAttrValueEntityList);
+//        productAttrValueService.updateBatchById(productAttrValueEntityList);
         return R.ok();
     }
 
