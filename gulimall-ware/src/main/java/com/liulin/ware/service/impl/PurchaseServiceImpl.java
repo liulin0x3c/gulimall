@@ -32,7 +32,7 @@ public class PurchaseServiceImpl extends ServiceImpl<PurchaseDao, PurchaseEntity
     public PageUtils queryPage(Map<String, Object> params) {
         IPage<PurchaseEntity> page = this.page(
                 new Query<PurchaseEntity>().getPage(params),
-                new QueryWrapper<PurchaseEntity>()
+                new QueryWrapper<>()
         );
 
         return new PageUtils(page);
@@ -56,7 +56,6 @@ public class PurchaseServiceImpl extends ServiceImpl<PurchaseDao, PurchaseEntity
 
     /**
      * 合并采购需求
-     * @param mergeVo
      */
     @Transactional(rollbackFor = Exception.class)
     @Override
