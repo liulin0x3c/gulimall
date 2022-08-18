@@ -25,6 +25,7 @@
         <module>gulimall-coupon</module>
         <module>gulimall-gateway</module>
         <module>gulimall-third-party</module>
+        <module>gulimall-search</module>
 
         <module>renren-generator</module>
         <module>renren-fast</module>
