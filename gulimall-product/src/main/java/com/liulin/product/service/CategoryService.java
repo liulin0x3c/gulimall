@@ -3,6 +3,7 @@ package com.liulin.product.service;
 import com.baomidou.mybatisplus.extension.service.IService;
 import com.liulin.common.utils.PageUtils;
 import com.liulin.product.entity.CategoryEntity;
+import com.liulin.product.vo.LevelOneCategoryEntityDetailVo;
 
 import java.util.List;
 import java.util.Map;
@@ -25,5 +26,9 @@ public interface CategoryService extends IService<CategoryEntity> {
     Long[] findCatelogPath(Long catelogId);
 
     void safeUpdateById(CategoryEntity category);
+
+    List<CategoryEntity> getCategoryEntityLevelOneList();
+
+    LevelOneCategoryEntityDetailVo getLevelOneCategoryEntityDetailVo();
 }
 

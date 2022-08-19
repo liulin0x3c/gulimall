@@ -1,7 +1,8 @@
 package com.liulin.product.service.impl;
 
-import com.baomidou.mybatisplus.core.mapper.BaseMapper;
+import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper;
 import com.liulin.product.service.CategoryBrandRelationService;
+import com.liulin.product.vo.LevelOneCategoryEntityDetailVo;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
@@ -26,7 +27,7 @@ public class CategoryServiceImpl extends ServiceImpl<CategoryDao, CategoryEntity
     public PageUtils queryPage(Map<String, Object> params) {
         IPage<CategoryEntity> page = this.page(
                 new Query<CategoryEntity>().getPage(params),
-                new QueryWrapper<CategoryEntity>()
+                new QueryWrapper<>()
         );
 
         return new PageUtils(page);
@@ -73,6 +74,32 @@ public class CategoryServiceImpl extends ServiceImpl<CategoryDao, CategoryEntity
     public void safeUpdateById(CategoryEntity category) {
         this.updateById(category);
         categoryBrandRelationService.updateCategory(category.getCatId(),category.getName());
+    }
+
+    @Override
+    public List<CategoryEntity> getCategoryEntityLevelOneList() {
+        return this.list(new LambdaQueryWrapper<CategoryEntity>().eq(CategoryEntity::getCatLevel, 1));
+    }
+
+    @Override
+    public LevelOneCategoryEntityDetailVo getLevelOneCategoryEntityDetailVo() {
+        LevelOneCategoryEntityDetailVo levelOneCategoryEntityDetailVo = new LevelOneCategoryEntityDetailVo();
+        List<CategoryEntity> categoryEntityLevelOneList = this.getCategoryEntityLevelOneList();
+        //NULL
+        categoryEntityLevelOneList.forEach(categoryEntity -> {
+                Long catId = categoryEntity.getCatId();
+                List<CategoryEntity> category2Entities = this.list(new LambdaQueryWrapper<CategoryEntity>().eq(CategoryEntity::getParentCid, catId).eq(CategoryEntity::getCatLevel, 2));
+                //NULL
+            List<LevelOneCategoryEntityDetailVo.LeveTwoCategoryEntityDetailVo> leveTwoCategoryEntityDetailVos = category2Entities.stream().map(category2Entity -> {
+                Long catId2 = category2Entity.getCatId();
+                List<CategoryEntity> category3Entities = this.list(new LambdaQueryWrapper<CategoryEntity>().eq(CategoryEntity::getParentCid, catId2).eq(CategoryEntity::getCatLevel, 3));
+                //NULL
+                List<LevelOneCategoryEntityDetailVo.LeveTwoCategoryEntityDetailVo.LevelTreeCategoryEntityDetailVo> levelTreeCategoryEntityDetailVoList = category3Entities.stream().map(category3Entity -> new LevelOneCategoryEntityDetailVo.LeveTwoCategoryEntityDetailVo.LevelTreeCategoryEntityDetailVo(catId2.toString(), category3Entity.getCatId().toString(), category3Entity.getName())).collect(Collectors.toList());
+                return new LevelOneCategoryEntityDetailVo.LeveTwoCategoryEntityDetailVo(catId.toString(), category2Entity.getCatId().toString(), levelTreeCategoryEntityDetailVoList, category2Entity.getName());
+            }).collect(Collectors.toList());
+            levelOneCategoryEntityDetailVo.putChildCategoryEntity(catId, leveTwoCategoryEntityDetailVos);
+        });
+        return levelOneCategoryEntityDetailVo;
     }
 
     private List<CategoryEntity> getChildren(CategoryEntity root, List<CategoryEntity> all) {
