@@ -14,11 +14,12 @@ public class WareConstant {
         RECEIVE(2,"已领取"),
         FINISH(3,"已完成"),
         HASERROR(4,"有异常"),
+
         ;
 
-        private final int code;
+        private int code;
 
-        private final String msg;
+        private String msg;
 
         public int getCode() {
             return code;
@@ -45,9 +46,9 @@ public class WareConstant {
 
         ;
 
-        private final int code;
+        private int code;
 
-        private final String msg;
+        private String msg;
 
         public int getCode() {
             return code;

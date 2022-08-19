@@ -1,9 +1,11 @@
 package com.liulin.ware.service;
 
 import com.baomidou.mybatisplus.extension.service.IService;
+import com.liulin.common.to.SkuHasStockTo;
 import com.liulin.common.utils.PageUtils;
 import com.liulin.ware.entity.WareSkuEntity;
 
+import java.util.List;
 import java.util.Map;
 
 /**
@@ -16,5 +18,7 @@ import java.util.Map;
 public interface WareSkuService extends IService<WareSkuEntity> {
 
     PageUtils queryPage(Map<String, Object> params);
+
+    List<SkuHasStockTo> getStockBatchByIds(List<Long> ids);
 }
 

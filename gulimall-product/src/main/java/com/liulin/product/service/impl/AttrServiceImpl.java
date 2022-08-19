@@ -144,6 +144,14 @@ public class AttrServiceImpl extends ServiceImpl<AttrDao, AttrEntity> implements
         }
         return new PageUtils(fuzzyPageQuery(params, queryWrapper1));
     }
+
+    @Override
+    public List<Long> selectSearchAttrs(List<Long> attrIds) {
+//        LambdaQueryWrapper<AttrEntity> queryWrapper = new LambdaQueryWrapper<AttrEntity>().in(AttrEntity::getAttrId, attrIds).eq(AttrEntity::getSearchType, 1);
+//        return this.list(queryWrapper).stream().map(AttrEntity::getAttrId).collect(Collectors.toList());
+        return this.baseMapper.selectSearchAttrs(attrIds);
+    }
+
     private IPage<AttrEntity> fuzzyPageQuery(Map<String, Object> params, LambdaQueryWrapper<AttrEntity> queryWrapper) {
         String key = (String) params.get("key");
         if(StringUtils.isNotEmpty(key)) {

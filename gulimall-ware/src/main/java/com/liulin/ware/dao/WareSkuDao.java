@@ -1,8 +1,12 @@
 package com.liulin.ware.dao;
 
+import com.liulin.common.to.SkuHasStockTo;
 import com.liulin.ware.entity.WareSkuEntity;
 import com.baomidou.mybatisplus.core.mapper.BaseMapper;
 import org.apache.ibatis.annotations.Mapper;
+import org.apache.ibatis.annotations.Param;
+
+import java.util.List;
 
 /**
  * 商品库存
@@ -13,5 +17,6 @@ import org.apache.ibatis.annotations.Mapper;
  */
 @Mapper
 public interface WareSkuDao extends BaseMapper<WareSkuEntity> {
-	
+
+    Long getStockBySkuId(@Param("id") Long id);
 }

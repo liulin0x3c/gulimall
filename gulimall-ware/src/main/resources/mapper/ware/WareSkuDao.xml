@@ -12,6 +12,12 @@
         <result property="skuName" column="sku_name"/>
         <result property="stockLocked" column="stock_locked"/>
     </resultMap>
+<!--    <select id="getStockBatchByIds" resultType="com.liulin.common.to.SkuHasStockTo">-->
+<!--        SELECT SUM(stock - stock_locked) FROM `wms_ware_sku` WHERE sku_id =-->
+<!--    </select>-->
+    <select id="getStockBySkuId" resultType="java.lang.Long">
+            SELECT SUM(stock - stock_locked) FROM `wms_ware_sku` WHERE sku_id = #{id}
+    </select>
 
 
 </mapper>

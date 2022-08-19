@@ -1,8 +1,14 @@
 package com.liulin.ware.service.impl;
 
+import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper;
 import com.baomidou.mybatisplus.core.toolkit.StringUtils;
+import com.liulin.common.to.SkuHasStockTo;
 import org.springframework.stereotype.Service;
+
+import java.util.List;
 import java.util.Map;
+import java.util.stream.Collectors;
+
 import com.baomidou.mybatisplus.core.conditions.query.QueryWrapper;
 import com.baomidou.mybatisplus.core.metadata.IPage;
 import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
@@ -38,6 +44,22 @@ public class WareSkuServiceImpl extends ServiceImpl<WareSkuDao, WareSkuEntity> i
         );
 
         return new PageUtils(page);
+    }
+
+    @Override
+    public List<SkuHasStockTo> getStockBatchByIds(List<Long> ids) {
+
+        List<SkuHasStockTo> SkuHasStockTos = ids.stream().map(id -> {
+            SkuHasStockTo skuHasStockTo = new SkuHasStockTo();
+            Long stock = this.baseMapper.getStockBySkuId(id);
+            skuHasStockTo.setHasStock(stock!=null && stock > 0);
+            skuHasStockTo.setSkuId(id);
+            return skuHasStockTo;
+        }).collect(Collectors.toList());
+
+        return SkuHasStockTos;
+
+
     }
 
 }
