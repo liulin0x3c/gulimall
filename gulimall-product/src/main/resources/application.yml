@@ -30,3 +30,5 @@
 spring:
   thymeleaf:
     cache: false
+  redis:
+    host: 192.168.56.10
